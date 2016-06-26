@@ -7,10 +7,10 @@ import (
 )
 
 func main() {
-	fmt.Print(FormatWithIndex(os.Args))
+	fmt.Print(formatWithIndex(os.Args))
 }
 
-func FormatWithIndex(strs []string) string {
+func formatWithIndex(strs []string) string {
 	concat := ""
 	for i, str := range strs {
 		concat += fmt.Sprintf("[%d]%s\n", i, str)
