@@ -44,6 +44,7 @@ func storeLines(f *os.File, counts map[string]set) {
 		if counts[input.Text()] == nil {
 			counts[input.Text()] = make(set)
 		}
+		// set temporal value
 		counts[input.Text()][f.Name()] = true
 	}
 }
