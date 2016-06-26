@@ -1,4 +1,4 @@
-// ex03-benchmark-echo prints benchmark test of echo programs.
+// ex03-benchmark-echo prints benchmark tests for two types of echo programs.
 package main
 
 import (
