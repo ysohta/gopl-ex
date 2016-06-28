@@ -1,4 +1,4 @@
-// ex05-lissajous creates random lissajous figure with green line.
+// ex05-lissajous creates random lissajous figure with green curves.
 package main
 
 import (
