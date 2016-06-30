@@ -43,7 +43,7 @@ func TestCtoF(t *testing.T) {
 	for _, test := range tests {
 		got := CToF(test.c)
 		diff := got - test.want
-		if diff < -test.delta || diff > test.delta {
+		if diff <= -test.delta || diff >= test.delta {
 			t.Errorf("Expected:%g Actual:%g", test.want, got)
 		}
 	}
@@ -63,7 +63,7 @@ func TestFtoC(t *testing.T) {
 	for _, test := range tests {
 		got := FToC(test.f)
 		diff := got - test.want
-		if diff < -test.delta || diff > test.delta {
+		if diff <= -test.delta || diff >= test.delta {
 			t.Errorf("Expected:%g Actual:%g", test.want, got)
 		}
 	}
@@ -83,7 +83,7 @@ func TestKtoF(t *testing.T) {
 	for _, test := range tests {
 		got := KToF(test.k)
 		diff := got - test.want
-		if diff < -test.delta || diff > test.delta {
+		if diff <= -test.delta || diff >= test.delta {
 			t.Errorf("Expected:%g Actual:%g", test.want, got)
 		}
 	}
@@ -103,7 +103,7 @@ func TestKtoC(t *testing.T) {
 	for _, test := range tests {
 		got := KToC(test.k)
 		diff := got - test.want
-		if diff < -test.delta || diff > test.delta {
+		if diff <= -test.delta || diff >= test.delta {
 			t.Errorf("Expected:%g Actual:%g", test.want, got)
 		}
 	}
@@ -123,7 +123,7 @@ func TestCtoK(t *testing.T) {
 	for _, test := range tests {
 		got := CToK(test.c)
 		diff := got - test.want
-		if diff < -test.delta || diff > test.delta {
+		if diff <= -test.delta || diff >= test.delta {
 			t.Errorf("Expected:%g Actual:%g", test.want, got)
 		}
 	}
@@ -143,7 +143,7 @@ func TestFtoK(t *testing.T) {
 	for _, test := range tests {
 		got := FToK(test.f)
 		diff := got - test.want
-		if diff < -test.delta || diff > test.delta {
+		if diff <= -test.delta || diff >= test.delta {
 			t.Errorf("Expected:%g Actual:%g", test.want, got)
 		}
 	}
