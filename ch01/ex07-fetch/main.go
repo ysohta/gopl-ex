@@ -1,9 +1,9 @@
+// ex07-fetch prints loaded content from URL.
 package main
 
 import (
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"os"
 )
@@ -24,11 +24,10 @@ func fetch(url string) error {
 	if err != nil {
 		return fmt.Errorf("fetch: %v", err)
 	}
-	b, err := ioutil.ReadAll(resp.Body)
+	_, err = io.Copy(out, resp.Body)
 	resp.Body.Close()
 	if err != nil {
 		return fmt.Errorf("fetch: reading %s: %v", url, err)
 	}
-	fmt.Fprintf(out, "%s", b)
 	return nil
 }

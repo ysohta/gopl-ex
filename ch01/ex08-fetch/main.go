@@ -1,3 +1,4 @@
+// ex08-fetch prints http response and loaded content from URL.
 package main
 
 import (

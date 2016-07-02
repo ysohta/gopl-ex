@@ -36,23 +36,14 @@ func TestFetch(t *testing.T) {
 func TestFetchFailed(t *testing.T) {
 	var tests = []struct {
 		url string
-		err string
 	}{
-		{
-			"http://gopla.io",
-			"fetch: Get http://gopla.io: dial tcp: lookup gopla.io: no such host"
-		},
-		{
-			"ftp://gopla.io",
-			"fetch: Get http://ftp://gopla.io: dial tcp: lookup tcp/: nodename nor servname provided, or not known"
-		},
+		{"http://gopla.io"},
+		{"ftp://gopla.io"},
 	}
 	for _, test := range tests {
 		err := fetch(test.url)
-		actual := err.Error()
-		expected := test.err
-		if actual != expected {
-			t.Errorf("Actual:%s\tExpected:%s", actual, expected)
+		if err == nil {
+			t.Error("error is missing\n")
 		}
 	}
 }
