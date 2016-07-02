@@ -1,47 +1,53 @@
-// ex11-fetchall creates loaded html files.
+// ex11-fetchall creates files from specified URL.
 package main
 
 import (
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"os"
 	"time"
 )
 
-var out io.Writer = os.Stdout
-
 func main() {
 	start := time.Now()
 	fetchall(os.Args[1:])
-	fmt.Fprintf(out, "%.2fs elapsed\n", time.Since(start).Seconds())
+	fmt.Printf("%.2fs elapsed\n", time.Since(start).Seconds())
 }
 
 func fetchall(urls []string) {
 	ch := make(chan string)
-	for _, url := range urls {
-		go fetch(url, ch)
+	for i, url := range urls {
+		filepath := fmt.Sprintf("fetched_%d.html", i)
+		go fetch(url, ch, filepath)
 	}
 	for range urls {
-		fmt.Fprintln(out, <-ch)
+		fmt.Println(<-ch)
 	}
 }
 
-func fetch(url string, ch chan<- string) {
+func fetch(url string, ch chan<- string, filepath string) {
+	// Create a file
+	out, err := os.Create(filepath)
+	if err != nil {
+		ch <- fmt.Sprint(err)
+		return
+	}
+	defer out.Close()
+
 	start := time.Now()
 	resp, err := http.Get(url)
 	if err != nil {
 		ch <- fmt.Sprint(err)
 		return
 	}
+	defer resp.Body.Close()
 
-	nbytes, err := io.Copy(ioutil.Discard, resp.Body)
-	resp.Body.Close()
+	nbytes, err := io.Copy(out, resp.Body)
 	if err != nil {
 		ch <- fmt.Sprintf("while reading %s: %v", url, err)
 		return
 	}
 	secs := time.Since(start).Seconds()
-	ch <- fmt.Sprintf("%.2d %7d %s", secs, nbytes, url)
+	ch <- fmt.Sprintf("%.2fs %7d %s", secs, nbytes, url)
 }
