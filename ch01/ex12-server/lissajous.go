@@ -23,14 +23,6 @@ const (
 	blueIndex  = 3
 )
 
-type param struct {
-	cycles  int
-	res     float64
-	size    int
-	nframes int
-	delay   int
-}
-
 func lissajous(out io.Writer, p param) {
 	freq := rand.Float64() * 3.0
 	anim := gif.GIF{LoopCount: p.nframes}
