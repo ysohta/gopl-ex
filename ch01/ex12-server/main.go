@@ -8,7 +8,7 @@ import (
 )
 
 func main() {
-	// Query Example:
+	// Query 	Example:
 	// http://localhost:8000/?cycles=20&res=0.01&size=200&nframes=32&delay=16
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		p := param{
