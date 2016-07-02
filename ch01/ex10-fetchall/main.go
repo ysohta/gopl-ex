@@ -1,3 +1,4 @@
+// ex10-fetchall creates files from specified URL.
 package main
 
 import (
