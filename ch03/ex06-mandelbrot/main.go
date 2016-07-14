@@ -27,6 +27,7 @@ func main() {
 
 func supersampling(px, py float64) color.Color {
 	var pixels []color.Color
+	// loop for each subpixel
 	for offsety := 0.0; offsety < 1.0; offsety += shift {
 		for offsetx := 0.0; offsetx < 1.0; offsetx += shift {
 			y := (py+offsety)/height*(ymax-ymin) + ymin
@@ -56,6 +57,7 @@ func intermediate(colors []color.Color) color.Color {
 	var sR, sG, sB, sA uint32
 	n := uint32(len(colors))
 	for _, c := range colors {
+		// returns values in the range of uint16
 		r, g, b, a := c.RGBA()
 		sR += r
 		sG += g
