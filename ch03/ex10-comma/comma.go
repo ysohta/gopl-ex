@@ -13,7 +13,7 @@ const (
 func comma(s string) string {
 	var buf bytes.Buffer
 	start := len(s) % interval
-	buf.WriteString(s[0:start])
+	buf.WriteString(s[:start])
 	for i := start; i < len(s); i += interval {
 		// avoid comma at top
 		if buf.Len() > 0 {
