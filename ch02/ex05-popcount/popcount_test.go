@@ -4,7 +4,7 @@ import (
 	"testing"
 )
 
-// => "BenchmarkShiftPopCount-4	30000000	        53.8 ns/op"
+// => "BenchmarkPopCountClearMinBit-4	30000000	        65.1 ns/op"
 func BenchmarkPopCountClearMinBit(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		PopCountClearMinBit(0xffffffffffffffff)
