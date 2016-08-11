@@ -1,6 +1,15 @@
 package main
 
-import "crypto/sha256"
+import (
+	"crypto/sha256"
+	"fmt"
+)
+
+func main() {
+	diff := diffBitSha256("x", "X")
+	fmt.Printf("%d\n", diff)
+	// =>"125"
+}
 
 func diffBitSha256(data1, data2 string) int {
 	c1 := sha256.Sum256([]byte(data1))
