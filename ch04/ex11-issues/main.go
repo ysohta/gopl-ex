@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strconv"
 )
 
 var (
@@ -42,8 +43,21 @@ func main() {
 			log.Fatal(err)
 		}
 		printIssues(issues)
-	}
 
+	case "close":
+		fmt.Print("number:")
+		s := readLine()
+		var i int
+		var err error
+		if i, err = strconv.Atoi(s); err != nil {
+			log.Fatal(err)
+		}
+		issue, err := closeIssue(i)
+		if err != nil {
+			log.Fatal(err)
+		}
+		printIssue(*issue)
+	}
 }
 
 func readLine() string {

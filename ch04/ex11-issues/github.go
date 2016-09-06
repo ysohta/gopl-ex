@@ -68,3 +68,26 @@ func ListIssues() ([]Issue, error) {
 
 	return result, nil
 }
+
+func closeIssue(number int) (*Issue, error) {
+	url := fmt.Sprintf(IssuesURL+"/%s/%s/issues/%d?access_token=%s", owner, repo, number, token)
+
+	r := strings.NewReader("{\"state\":\"closed\"}")
+
+	resp, err := http.Post(url, jsonBody, r)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("failed: %s", resp.Status)
+	}
+
+	var result Issue
+	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
+		return nil, err
+	}
+
+	return &result, nil
+}
