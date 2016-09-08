@@ -10,16 +10,15 @@ import (
 )
 
 var (
-	cmd, owner, repo, token, number, editor string
+	cmd, owner, repo, token, editor string
 )
 
 func init() {
-	flag.StringVar(&cmd, "cmd", "list", "command for the issues")
-	flag.StringVar(&owner, "owner", "", "repository owner")
-	flag.StringVar(&repo, "repo", "", "repository name")
+	flag.StringVar(&cmd, "cmd", "list", "command for the issues [create, list, edit, close]")
+	flag.StringVar(&owner, "owner", "", "github epository owner")
+	flag.StringVar(&repo, "repo", "", "github epository name")
 	flag.StringVar(&token, "token", "", "OAUTH token")
-	flag.StringVar(&number, "number", "", "issue number")
-	flag.StringVar(&editor, "editor", "nano", "text editor program")
+	flag.StringVar(&editor, "editor", "vi", "text editor program")
 
 	flag.Parse()
 }
@@ -27,10 +26,14 @@ func init() {
 func main() {
 	switch cmd {
 	case "create":
+		var title, body string
+		var err error
 		fmt.Print("title:")
-		title := readLine()
-		fmt.Print("body:")
-		body := readLine()
+		title = readLine()
+		if err != nil {
+			log.Fatal(err)
+		}
+		body, err = execute(editor, "Leave a comment")
 		issue, err := createIssue(Issue{Title: title, Body: body})
 		if err != nil {
 			log.Fatal(err)
