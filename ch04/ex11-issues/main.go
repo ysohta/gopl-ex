@@ -47,6 +47,36 @@ func main() {
 		}
 		printIssues(issues)
 
+	case "edit":
+		fmt.Print("number:")
+		s := readLine()
+
+		var i int
+		var err error
+		var issue *Issue
+		if i, err = strconv.Atoi(s); err != nil {
+			log.Fatal(err)
+		}
+
+		issue, err = GetIssue(i)
+		if err != nil {
+			log.Fatal(err)
+		}
+		printIssue(*issue)
+
+		var title, body string
+		fmt.Print("title:")
+		title = readLine()
+		if err != nil {
+			log.Fatal(err)
+		}
+		body, err = execute(editor, issue.Body)
+		issue, err = editIssue(i, Issue{Title: title, Body: body})
+		if err != nil {
+			log.Fatal(err)
+		}
+		printIssue(*issue)
+
 	case "close":
 		fmt.Print("number:")
 		s := readLine()
@@ -78,5 +108,5 @@ func printIssues(issues []Issue) {
 func printIssue(issue Issue) {
 	fmt.Println("-----")
 	fmt.Printf("#%d[%s]%s\n", issue.Number, issue.State, issue.Title)
-	fmt.Println(issue.Body)
+	fmt.Printf("%s\n\n", issue.Body)
 }
