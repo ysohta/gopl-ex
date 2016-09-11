@@ -1,0 +1,68 @@
+package main
+
+import (
+	"encoding/json"
+	"fmt"
+	"net/http"
+	"net/url"
+	"strings"
+	"time"
+)
+
+const IssuesURL = "https://api.github.com/search/issues"
+
+type IssuesSearchResult struct {
+	TotalCount int `json:"total_count"`
+	Items      []*Issue
+}
+
+type Issue struct {
+	Number    int
+	HTMLURL   string `json:"html_url"`
+	Title     string
+	State     string
+	User      *User
+	Milestone *Milestone
+	Labels    []*Label
+	CreatedAt time.Time `json:"created_at"`
+	Body      string
+}
+
+type User struct {
+	Login     string
+	HTMLURL   string `json:"html_url"`
+	AvatarURL string `json:"avatar_url"`
+}
+
+type Milestone struct {
+	Number  int
+	Title   string
+	HTMLURL string `json:"html_url"`
+	State   string
+}
+
+type Label struct {
+	Name string
+	URL  string
+}
+
+func SearchIssues(terms []string) (*IssuesSearchResult, error) {
+	q := url.QueryEscape(strings.Join(terms, " "))
+	resp, err := http.Get(IssuesURL + "?q=" + q + "&sort=created&order=asc")
+	if err != nil {
+		return nil, err
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		resp.Body.Close()
+		return nil, fmt.Errorf("search query failed: %s", resp.Status)
+	}
+
+	var result IssuesSearchResult
+	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
+		resp.Body.Close()
+		return nil, err
+	}
+	resp.Body.Close()
+	return &result, nil
+}
