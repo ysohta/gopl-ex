@@ -1,10 +1,10 @@
 package main
 
 import (
+	"fmt"
 	"html/template"
 	"log"
-	"os"
-	"time"
+	"net/http"
 )
 
 const templ = `
@@ -135,15 +135,27 @@ var report = template.Must(template.New("issuelist").
 	Parse(templ))
 
 func main() {
-	result, err := SearchIssues(os.Args[1:])
-	if err != nil {
-		log.Fatal(err)
-	}
-	if err := report.Execute(os.Stdout, result); err != nil {
-		log.Fatal(err)
-	}
-}
+	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		if err := r.ParseForm(); err != nil {
+			log.Print(err)
+		}
 
-func daysAgo(t time.Time) int {
-	return int(time.Since(t).Hours() / 24)
+		val, ok := r.Form["q"]
+		if ok {
+			var terms []string
+			terms = append(terms, val[0])
+
+			result, err := SearchIssues(terms)
+			if err != nil {
+				log.Fatal(err)
+			}
+			if err := report.Execute(w, result); err != nil {
+				log.Fatal(err)
+			}
+		} else {
+			fmt.Fprint(w, "invalid query")
+		}
+	})
+
+	log.Fatal(http.ListenAndServe("localhost:8000", nil))
 }
