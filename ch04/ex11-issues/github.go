@@ -70,7 +70,7 @@ func GetIssue(number int) (*Issue, error) {
 }
 
 func ListIssues() ([]Issue, error) {
-	url := fmt.Sprintf(IssuesURL+"/%s/%s/issues?direction=asc&state=all&access_token=%s", owner, repo, token)
+	url := fmt.Sprintf(IssuesURL+"/%s/%s/issues?direction=asc&state=all", owner, repo)
 
 	resp, err := http.Get(url)
 	if err != nil {
