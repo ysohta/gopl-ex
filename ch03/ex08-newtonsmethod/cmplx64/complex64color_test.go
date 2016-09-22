@@ -34,7 +34,7 @@ func TestApproximate(t *testing.T) {
 		{-1, 0},
 		{1i, 0},
 		{-1i, 0},
-		{1.01, 2},
+		{1.01, 1},
 	}
 
 	for _, test := range tests {
