@@ -19,19 +19,28 @@ var prereqs = map[string][]string{
 	"databases":             {"data structures"},
 	"discrete math":         {"intro to programming"},
 	"formal languages":      {"discrete math"},
-	"linear algebra":        {"calculus"},
 	"networks":              {"operating systems"},
 	"operating systems":     {"data structures", "computer organization"},
 	"programming languages": {"data structures", "computer organization"},
 }
 
 func main() {
-	courses, acyclic := topoSort(prereqs)
-	if acyclic {
+	if courses, acyclic := topoSort(prereqs); acyclic {
 		fmt.Println("acyclic found")
+	} else {
+		for i, course := range courses {
+			fmt.Printf("%d:\t%s\n", i+1, course)
+		}
 	}
-	for i, course := range courses {
-		fmt.Printf("%d:\t%s\n", i+1, course)
+
+	fmt.Println("add acyclic relation")
+	prereqs["linear algebra"] = append(prereqs["linear algebra"], "calculus")
+	if courses, acyclic := topoSort(prereqs); acyclic {
+		fmt.Println("acyclic found")
+	} else {
+		for i, course := range courses {
+			fmt.Printf("%d:\t%s\n", i+1, course)
+		}
 	}
 }
 
@@ -50,7 +59,9 @@ func topoSort(m map[string][]string) ([]string, bool) {
 				seen[item] = true
 
 				visited[item] = true
-				acyclic = visitAll(m[item], visited)
+				if acyclic = visitAll(m[item], visited); acyclic {
+					return true
+				}
 				visited[item] = false
 
 				order = append(order, item)

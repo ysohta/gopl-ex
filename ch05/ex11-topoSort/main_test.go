@@ -20,6 +20,10 @@ func TestTopoSort(t *testing.T) {
 			nil,
 			true,
 		}, {
+			map[string][]string{"a": {"b"}, "b": {"a"}, "c": {"d"}},
+			nil,
+			true,
+		}, {
 			map[string][]string{"a": {"c"}, "b": {"c"}},
 			[]string{"c", "a", "b"},
 			false,
