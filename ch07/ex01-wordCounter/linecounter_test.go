@@ -1,28 +1,32 @@
-package main
+package wordcounter
 
 import "testing"
 
-func TestWordCounterWrite(t *testing.T) {
+func TestLineCounterWrite(t *testing.T) {
 	tests := []struct {
 		data []string
 		want int
 	}{
 		{
 			[]string{"hello world"},
-			2,
+			1,
 		},
 		{
 			[]string{"  can   trim  "},
-			2,
+			1,
 		},
 		{
 			[]string{"there\nare\nlines"},
 			3,
 		},
+		{
+			[]string{""},
+			0,
+		},
 	}
 
 	for _, test := range tests {
-		var c WordCounter
+		var c LineCounter
 
 		for _, s := range test.data {
 			c.Write([]byte(s))
@@ -32,6 +36,5 @@ func TestWordCounterWrite(t *testing.T) {
 		if got != test.want {
 			t.Errorf("expected=%v actual=%v", test.want, got)
 		}
-
 	}
 }
