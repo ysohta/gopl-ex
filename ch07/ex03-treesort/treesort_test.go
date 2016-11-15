@@ -1,8 +1,8 @@
 package treesort
 
-import "testing"
 import (
 	"reflect"
+	"testing"
 )
 
 func TestString(t *testing.T) {
