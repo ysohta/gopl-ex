@@ -9,20 +9,21 @@ type LimitedReader struct {
 }
 
 func (r *LimitedReader) Read(p []byte) (n int, err error) {
+	// nothing remains
 	if r.remain < 1 {
 		return 0, io.EOF
 	}
-	if r.remain > len(p) {
-		r.remain -= len(p)
-		return r.Reader.Read(p)
-	}
 
 	n, err = r.Reader.Read(p)
+
+	// over limit
 	if n > r.remain {
 		n = r.remain
 	}
+
 	r.remain -= n
 	p = p[:n]
+
 	return n, err
 }
 
