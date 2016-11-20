@@ -33,15 +33,6 @@ type sortRules struct {
 	rules []comparer
 }
 
-func (x sortRules) Add(c comparer) {
-	// unshift
-	x.rules, x.rules[0] = append(x.rules[:1], x.rules[0:]...), c
-}
-
-func (x sortRules) Clear() {
-	x.rules = x.rules[:0]
-}
-
 func (x sortRules) Len() int {
 	return len(x.t)
 }
