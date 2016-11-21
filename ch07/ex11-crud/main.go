@@ -7,8 +7,11 @@ import (
 	"strconv"
 )
 
+var (
+	db = database{"shoes": 50, "socks": 5}
+)
+
 func main() {
-	db := database{"shoes": 50, "socks": 5}
 	http.HandleFunc("/list", db.list)
 	http.HandleFunc("/price", db.price)
 	http.HandleFunc("/create", db.create)
@@ -68,11 +71,6 @@ func (db database) create(w http.ResponseWriter, req *http.Request) {
 
 func (db database) update(w http.ResponseWriter, req *http.Request) {
 	item := req.URL.Query().Get("item")
-	if item == "" {
-		w.WriteHeader(http.StatusNotFound) // 404
-		fmt.Fprintf(w, "invalid item name: %q\n", item)
-		return
-	}
 	if _, ok := db[item]; !ok {
 		w.WriteHeader(http.StatusNotFound) // 404
 		fmt.Fprintf(w, "item not found: %q\n", item)
@@ -94,11 +92,6 @@ func (db database) update(w http.ResponseWriter, req *http.Request) {
 
 func (db database) del(w http.ResponseWriter, req *http.Request) {
 	item := req.URL.Query().Get("item")
-	if item == "" {
-		w.WriteHeader(http.StatusNotFound) // 404
-		fmt.Fprintf(w, "invalid item name: %q\n", item)
-		return
-	}
 	if _, ok := db[item]; !ok {
 		w.WriteHeader(http.StatusNotFound) // 404
 		fmt.Fprintf(w, "item not found: %q\n", item)
@@ -106,5 +99,5 @@ func (db database) del(w http.ResponseWriter, req *http.Request) {
 	}
 
 	delete(db, item)
-	fmt.Fprintf(w, "item deleted %s\n", item)
+	fmt.Fprintf(w, "item deleted: %q\n", item)
 }
