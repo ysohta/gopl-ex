@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"html/template"
 	"log"
 	"net/http"
@@ -24,10 +25,10 @@ var calcs = template.Must(template.New("calcs").
 <form action="calculate" method="post">
   <p>{{.Expr}}</p>
   <table>
-  {{range $var, $val := .Vars}}
+  {{range $var, $val := .Env}}
     <tr>
       <td>{{$var}}</td>
-      <td><input name="{{$var}}" value="0"></td>      
+      <td><input name="{{$var}}" value="{{$val}}"></td>      
     </tr>
   {{end}}
   </table>
@@ -37,7 +38,7 @@ var calcs = template.Must(template.New("calcs").
 `))
 
 var (
-	calc = calculator{nil, map[eval.Var]bool{}, 0}
+	calc = calculator{nil, map[eval.Var]bool{}, eval.Env{}, 0}
 )
 
 func main() {
@@ -50,6 +51,7 @@ func main() {
 type calculator struct {
 	Expr eval.Expr
 	Vars map[eval.Var]bool
+	Env  eval.Env
 	Ans  float64
 }
 
@@ -63,11 +65,23 @@ func (c calculator) validate(w http.ResponseWriter, req *http.Request) {
 	var err error
 	calc.Expr, err = eval.Parse(req.FormValue("expr"))
 	if err != nil {
-		log.Fatal(err)
+		w.WriteHeader(http.StatusNotFound) // 404
+		fmt.Fprintf(w, "failed to parse expression: %q\n", err)
+		return
 	}
 
+	// clear var
+	calc.Vars = map[eval.Var]bool{}
+
 	if err := calc.Expr.Check(calc.Vars); err != nil {
-		log.Fatal(err)
+		w.WriteHeader(http.StatusNotFound) // 404
+		fmt.Fprintf(w, "expression check error: %q\n", err)
+		return
+	}
+
+	calc.Env = eval.Env{}
+	for key := range calc.Vars {
+		calc.Env[key] = 0
 	}
 
 	if err := calcs.Execute(w, calc); err != nil {
@@ -76,18 +90,18 @@ func (c calculator) validate(w http.ResponseWriter, req *http.Request) {
 }
 
 func (c calculator) calculate(w http.ResponseWriter, req *http.Request) {
-	env := eval.Env{}
 	for key := range calc.Vars {
 		v := req.FormValue(string(key))
 		f, err := strconv.ParseFloat(v, 64)
 		if err != nil {
-			log.Fatal(err)
+			w.WriteHeader(http.StatusNotFound) // 404
+			fmt.Fprintf(w, "invalid number format: %q\n", err)
 			return
 		}
-		env[key] = f
+		calc.Env[key] = f
 	}
 
-	calc.Ans = calc.Expr.Eval(env)
+	calc.Ans = calc.Expr.Eval(calc.Env)
 	if err := calcs.Execute(w, calc); err != nil {
 		log.Fatal(err)
 	}
