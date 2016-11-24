@@ -5,9 +5,15 @@ import (
 	"fmt"
 )
 
-type Node interface{}
+type Node interface {
+	String() string
+}
 
 type CharData string
+
+func (c CharData) String() string {
+	return string(c)
+}
 
 type Element struct {
 	Type     xml.Name

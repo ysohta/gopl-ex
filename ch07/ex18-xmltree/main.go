@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"strings"
 )
 
 var (
@@ -15,7 +16,7 @@ var (
 func main() {
 	root := parse(os.Args[1:])
 	for _, n := range root.Children {
-		fmt.Fprintln(out, n)
+		fmt.Fprintf(out, "%s", n)
 	}
 }
 
@@ -43,7 +44,11 @@ func parse(args []string) Element {
 		case xml.EndElement:
 			stack = stack[:len(stack)-1] // pop
 		case xml.CharData:
-			el := CharData(tok)
+			trimed := strings.TrimSpace(string(tok))
+			if trimed == "" {
+				continue
+			}
+			el := CharData(trimed)
 			stack[len(stack)-1].Children = append(stack[len(stack)-1].Children, el)
 		}
 	}
