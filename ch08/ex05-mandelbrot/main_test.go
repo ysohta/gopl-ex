@@ -76,3 +76,8 @@ func BenchmarkGoroutine1024(b *testing.B) {
 		main()
 	}
 }
+
+func TestMain(t *testing.T) {
+	out = ioutil.Discard
+	main()
+}
