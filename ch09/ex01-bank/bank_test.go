@@ -8,6 +8,8 @@ import (
 
 func TestBankAsync(t *testing.T) {
 	var wg sync.WaitGroup
+	var got, want int
+	var expected bool
 
 	for i := 0; i < 100; i++ {
 		wg.Add(1)
@@ -24,21 +26,29 @@ func TestBankAsync(t *testing.T) {
 	}
 	wg.Wait()
 
-	want := 100
-	got := Balance()
+	want = 100
+	got = Balance()
 	if got != want {
 		t.Errorf("got:%d want:%d", got, want)
 	}
-
-	var expected bool
 
 	expected = true
 	if ok := Withdraw(100); ok != expected {
 		t.Errorf("expected:%t", expected)
 	}
+	want = 0
+	got = Balance()
+	if got != want {
+		t.Errorf("got:%d want:%d", got, want)
+	}
 
 	expected = false
 	if ok := Withdraw(1); ok != expected {
 		t.Errorf("expected:%t", expected)
+	}
+	want = 0
+	got = Balance()
+	if got != want {
+		t.Errorf("got:%d want:%d", got, want)
 	}
 }
