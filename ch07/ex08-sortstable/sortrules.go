@@ -8,7 +8,7 @@ var (
 	ByLength comparer = &byLength{}
 )
 
-type byTitle struct{}
+type byTitle []*Track
 
 func (b *byTitle) compare(t1, t2 *Track) int {
 	if t1.Title == t2.Title {
@@ -21,7 +21,13 @@ func (b *byTitle) compare(t1, t2 *Track) int {
 	return 1
 }
 
-type byArtist struct{}
+func (x byTitle) Len() int { return len(x) }
+
+func (x byTitle) Less(i, j int) bool { return x[i].Title < x[j].Title }
+
+func (x byTitle) Swap(i, j int) { x[i], x[j] = x[j], x[i] }
+
+type byArtist []*Track
 
 func (b *byArtist) compare(t1, t2 *Track) int {
 	if t1.Artist == t2.Artist {
@@ -34,7 +40,13 @@ func (b *byArtist) compare(t1, t2 *Track) int {
 	return 1
 }
 
-type byAlbum struct{}
+func (x byArtist) Len() int { return len(x) }
+
+func (x byArtist) Less(i, j int) bool { return x[i].Artist < x[j].Artist }
+
+func (x byArtist) Swap(i, j int) { x[i], x[j] = x[j], x[i] }
+
+type byAlbum []*Track
 
 func (b *byAlbum) compare(t1, t2 *Track) int {
 	if t1.Album == t2.Album {
@@ -47,7 +59,13 @@ func (b *byAlbum) compare(t1, t2 *Track) int {
 	return 1
 }
 
-type byYear struct{}
+func (x byAlbum) Len() int { return len(x) }
+
+func (x byAlbum) Less(i, j int) bool { return x[i].Album < x[j].Album }
+
+func (x byAlbum) Swap(i, j int) { x[i], x[j] = x[j], x[i] }
+
+type byYear []*Track
 
 func (b *byYear) compare(t1, t2 *Track) int {
 	if t1.Year == t2.Year {
@@ -60,7 +78,13 @@ func (b *byYear) compare(t1, t2 *Track) int {
 	return 1
 }
 
-type byLength struct{}
+func (x byYear) Len() int { return len(x) }
+
+func (x byYear) Less(i, j int) bool { return x[i].Year < x[j].Year }
+
+func (x byYear) Swap(i, j int) { x[i], x[j] = x[j], x[i] }
+
+type byLength []*Track
 
 func (b *byLength) compare(t1, t2 *Track) int {
 	if t1.Length == t2.Length {
@@ -72,3 +96,9 @@ func (b *byLength) compare(t1, t2 *Track) int {
 	}
 	return 1
 }
+
+func (x byLength) Len() int { return len(x) }
+
+func (x byLength) Less(i, j int) bool { return x[i].Length < x[j].Length }
+
+func (x byLength) Swap(i, j int) { x[i], x[j] = x[j], x[i] }

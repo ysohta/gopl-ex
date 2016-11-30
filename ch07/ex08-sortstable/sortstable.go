@@ -1,6 +1,9 @@
 package sortstable
 
-import "time"
+import (
+	"sort"
+	"time"
+)
 
 type Track struct {
 	Title  string
@@ -46,9 +49,16 @@ func (x sortRules) Less(i, j int) bool {
 		}
 	}
 
-	return true
+	return false
 }
 
 func (x sortRules) Swap(i, j int) {
 	x.t[i], x.t[j] = x.t[j], x.t[i]
+}
+
+func sortStable(s []sort.Interface) {
+	// from backward
+	for i := len(s) - 1; i >= 0; i-- {
+		sort.Stable(s[i])
+	}
 }
