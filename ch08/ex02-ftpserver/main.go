@@ -29,14 +29,15 @@ func handleConn(c net.Conn) {
 
 	io.WriteString(c, okay())
 
-	for {
+	var ct CommandType
+
+	for ct != QUIT {
 		s, err := bufio.NewReader(c).ReadString('\n')
-		if err == io.EOF {
-			log.Print("reached EOF")
-			return
-		}
 		if err != nil {
-			log.Print(err)
+			if err != io.EOF {
+				// unknown error occurs
+				log.Printf("read error: %s", err)
+			}
 			return
 		}
 
@@ -44,16 +45,11 @@ func handleConn(c net.Conn) {
 		log.Printf("c> %s", s)
 
 		strs := strings.Split(s, Separator)
-		cmd := GetCommand(CommandType(strs[0]))
-
-		var res string
+		ct = CommandType(strs[0])
 		if len(strs) > 1 {
-			res = cmd(strs[1:]...)
+			sendCommand(c, ct, strs[1:]...)
 		} else {
-			res = cmd()
+			sendCommand(c, ct)
 		}
-
-		io.WriteString(c, res)
-		log.Printf("s> %s", res)
 	}
 }

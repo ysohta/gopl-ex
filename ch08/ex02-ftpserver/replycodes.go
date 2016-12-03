@@ -4,14 +4,15 @@ type ReplyCode int
 
 const (
 	ReplyCodeOkay                = 200
-	ReplyCodeUserLoggedIn        = 230
-	ReplyCodeNeedAccount         = 332
 	ReplyCodeNameSystem          = 215
-	ReplyCodeCommandUnrecognized = 500
-	ReplyCodeNotImplemented      = 502
 	ReplyCodeCloeseConnection    = 221
-	ReplyCodePathNameCreated     = 257
+	ReplyCodeUserLoggedIn        = 230
 	ReplyCodeFileActionComplete  = 250
+	ReplyCodePathNameCreated     = 257
+	ReplyCodeNeedAccount         = 332
+	ReplyCodeConnectionClosed    = 426
+	ReplyCodeCommandUnrecognized = 500
 	ReplyCodeParameterError      = 501
+	ReplyCodeNotImplemented      = 502
 	ReplyCodeFileUnavailable     = 550
 )
