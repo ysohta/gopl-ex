@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"log"
 	"os"
@@ -26,6 +27,8 @@ const (
 	EPSV CommandType = "EPSV"
 	LIST CommandType = "LIST"
 	PORT CommandType = "PORT"
+	RETR CommandType = "RETR"
+	MDTM CommandType = "MDTM"
 )
 
 var (
@@ -46,6 +49,8 @@ func init() {
 		EPSV: epsv,
 		LIST: list,
 		PORT: port,
+		RETR: retr,
+		MDTM: mdtm,
 	}
 }
 
@@ -162,4 +167,65 @@ func list(sdr sender, req ...string) {
 	<-transferred
 
 	sdr.sendReplyCodeWithMessage(ReplyCodeCloseDataConnection, "Transfer complete")
+}
+
+func retr(sdr sender, req ...string) {
+	if len(req) < 1 {
+		sdr.sendReplyCode(ReplyCodeParameterError)
+		return
+	}
+
+	pathname := req[0]
+	fi, err := os.Stat(pathname)
+	if err != nil {
+		sdr.sendReplyCodeWithMessage(ReplyCodeFileUnavailable, "unable to open")
+		return
+	}
+	msg := fmt.Sprintf("Opening BINARY mode data connection for %s (%d bytes)", fi.Name(), fi.Size())
+	sdr.sendReplyCodeWithMessage(ReplyCodeFileStatusOkay, msg)
+
+	f, err := os.Open(pathname)
+	if err != nil {
+		sdr.sendReplyCodeWithMessage(ReplyCodeFileUnavailable, "unable to open")
+		return
+	}
+	defer f.Close()
+
+	p := make([]byte, 1024)
+	r := bufio.NewReader(f)
+	for {
+		n, err := r.Read(p)
+		if err != nil {
+			break
+		}
+		dataTransfer <- string(p[:n])
+	}
+
+	// for _, s := range strings.Split(string(out), "\n") {
+	// 	if s == "" || strings.HasPrefix(s, "total") {
+	// 		continue
+	// 	}
+	// 	dataTransfer <- fmt.Sprintf("%s\r\n", s)
+	// }
+
+	close(dataTransfer)
+
+	<-transferred
+
+	sdr.sendReplyCodeWithMessage(ReplyCodeCloseDataConnection, "Transfer complete")
+}
+
+func mdtm(sdr sender, req ...string) {
+	if len(req) < 1 {
+		sdr.sendReplyCode(ReplyCodeParameterError)
+		return
+	}
+	fi, err := os.Stat(req[0])
+	if err != nil {
+		sdr.sendReplyCodeWithMessage(ReplyCodeFileUnavailable, "unable to open")
+		return
+	}
+
+	t := fi.ModTime().Format("20060102150405")
+	sdr.sendReplyCodeWithMessage(ReplyCodeFileStatus, t)
 }

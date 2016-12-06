@@ -5,6 +5,7 @@ type ReplyCode int
 const (
 	ReplyCodeFileStatusOkay           = 150
 	ReplyCodeOkay                     = 200
+	ReplyCodeFileStatus               = 213
 	ReplyCodeNameSystem               = 215
 	ReplyCodeCloeseConnection         = 221
 	ReplyCodeCloseDataConnection      = 226
