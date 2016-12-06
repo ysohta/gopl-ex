@@ -94,7 +94,7 @@ func pwd(sdr sender, req ...string) {
 		return
 	}
 
-	msg := fmt.Sprintf("\"%s\"\n", dir)
+	msg := fmt.Sprintf("\"%s\"", dir)
 	sdr.sendReplyCodeWithMessage(ReplyCodePathNameCreated, msg)
 }
 
@@ -110,7 +110,7 @@ func cwd(sdr sender, req ...string) {
 		return
 	}
 
-	sdr.sendReplyCode(ReplyCodeFileActionComplete)
+	sdr.sendReplyCodeWithMessage(ReplyCodeFileActionComplete, "CWD command successful")
 }
 
 func pasv(sdr sender, req ...string) {
@@ -132,7 +132,7 @@ func epsv(sdr sender, req ...string) {
 	}
 
 	log.Print(port)
-	sdr.sendReplyCodeWithMessage(ReplyCodeNotImplemented, "EPSV command is not implemented")
+	sdr.sendReplyCodeWithMessage(ReplyCodeCommandUnrecognized, "EPSV command is not implemented")
 
 	// msg := fmt.Sprintf("Entering Extended Passive Mode (|||%d|)", port)
 	// sdr.sendReplyCodeWithMessage(ReplyCodeEnteringEpsv, msg)
@@ -145,30 +145,18 @@ func port(sdr sender, req ...string) {
 func list(sdr sender, req ...string) {
 	sdr.sendReplyCodeWithMessage(ReplyCodeFileStatusOkay, "Opening ASCII mode data connection for file list")
 
-	// sample list output
-	// strs := []string{
-	// 	"lrwxrwxrwx   1 root     root           16 Oct 21  2015 debian -> pub/Linux/debian",
-	// 	"lrwxrwxrwx   1 root     root           26 Oct 21  2015 debian-backports -> pub/Linux/debian-backports",
-	// 	"lrwxrwxrwx   1 root     root           19 Oct 21  2015 debian-cd -> pub/Linux/debian-cd",
-	// 	"lrwxrwxrwx   1 root     root           25 Oct 21  2015 debian-volatile -> pub/Linux/debian-volatile",
-	// 	"lrwxrwxrwx   1 root     root           16 Oct 21  2015 gentoo -> pub/Linux/gentoo",
-	// 	"drwxr-xr-x  25 ftp-mirror ftp-adm      4096 Oct 18 07:49 pub",
-	// }
-
 	out, err := exec.Command("ls", "-l").Output()
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	//og.Printf("%q", out)
-
-	// s := strings.Replace(out, "\n", "\r\n", -1)
-
 	for _, s := range strings.Split(string(out), "\n") {
-		dataTransfer <- fmt.Sprintf("%s\r\n", s)
+		if s != "" {
+			dataTransfer <- fmt.Sprintf("%s\r\n", s)
+		}
 	}
 
 	transferred <- "done"
 
-	sdr.sendReplyCode(ReplyCodeCloseDataConnection)
+	sdr.sendReplyCodeWithMessage(ReplyCodeCloseDataConnection, "Transfer complete")
 }
