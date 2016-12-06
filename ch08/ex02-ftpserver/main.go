@@ -2,14 +2,20 @@ package main
 
 import (
 	"bufio"
+	"fmt"
 	"io"
 	"log"
 	"net"
+	"strconv"
 	"strings"
 )
 
 func main() {
-	listener, err := net.Listen("tcp", "localhost:21")
+	connect()
+}
+
+func connect() {
+	listener, err := net.Listen("tcp", ":21")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -24,10 +30,63 @@ func main() {
 	}
 }
 
+func connectDataTransfer() (port int, err error) {
+	//  open random port
+	l, err := net.Listen("tcp", ":0")
+	if err != nil {
+		log.Fatal(err)
+	}
+	_, p, err := net.SplitHostPort(l.Addr().String())
+	if err != nil {
+		return 0, err
+	}
+	port, err = strconv.Atoi(p)
+	if err != nil {
+		return 0, err
+	}
+
+	go func(l net.Listener) {
+		conn, err := l.Accept()
+		if err != nil {
+			log.Print(err)
+			return
+		}
+
+		log.Printf("connected port:%d", port)
+
+		go handleDataTransferConn(conn)
+	}(l)
+
+	return port, nil
+}
+
+func connectDataTransferPort(port int) (err error) {
+	addr := fmt.Sprintf(":%d", port)
+	l, err := net.Listen("tcp", addr)
+
+	go func(l net.Listener) {
+		for {
+			log.Printf("connecting port:%d", port)
+
+			conn, err := l.Accept()
+			if err != nil {
+				log.Print(err)
+				return
+			}
+
+			go handleDataTransferConn(conn)
+		}
+	}(l)
+
+	return nil
+}
+
 func handleConn(c net.Conn) {
 	defer c.Close()
 
-	io.WriteString(c, okay())
+	sdr := sender{c}
+
+	sdr.sendReplyCode(ReplyCodeOkay)
 
 	var ct CommandType
 
@@ -46,10 +105,26 @@ func handleConn(c net.Conn) {
 
 		strs := strings.Split(s, Separator)
 		ct = CommandType(strs[0])
+		f := GetCommand(ct)
 		if len(strs) > 1 {
-			sendCommand(c, ct, strs[1:]...)
+			f(sdr, strs[1:]...)
 		} else {
-			sendCommand(c, ct)
+			f(sdr)
+		}
+	}
+}
+
+func handleDataTransferConn(c net.Conn) {
+	defer c.Close()
+
+	sdr := sender{c}
+
+	for {
+		select {
+		case data := <-dataTransfer:
+			sdr.sendData(data)
+		case <-transferred:
+			return
 		}
 	}
 }
