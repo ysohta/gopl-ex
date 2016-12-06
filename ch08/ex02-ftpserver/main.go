@@ -119,12 +119,15 @@ func handleDataTransferConn(c net.Conn) {
 
 	sdr := sender{c}
 
+	dataTransfer = make(chan string)
+
 	for {
-		select {
-		case data := <-dataTransfer:
-			sdr.sendData(data)
-		case <-transferred:
-			return
+		data, ok := <-dataTransfer
+		if !ok {
+			break
 		}
+		sdr.sendData(data)
 	}
+
+	transferred <- "done"
 }

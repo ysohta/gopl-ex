@@ -131,11 +131,11 @@ func epsv(sdr sender, req ...string) {
 		return
 	}
 
-	log.Print(port)
-	sdr.sendReplyCodeWithMessage(ReplyCodeCommandUnrecognized, "EPSV command is not implemented")
+	// log.Print(port)
+	// sdr.sendReplyCodeWithMessage(ReplyCodeCommandUnrecognized, "EPSV command is not implemented")
 
-	// msg := fmt.Sprintf("Entering Extended Passive Mode (|||%d|)", port)
-	// sdr.sendReplyCodeWithMessage(ReplyCodeEnteringEpsv, msg)
+	msg := fmt.Sprintf("Entering Extended Passive Mode (|||%d|)", port)
+	sdr.sendReplyCodeWithMessage(ReplyCodeEnteringEpsv, msg)
 }
 
 func port(sdr sender, req ...string) {
@@ -151,12 +151,15 @@ func list(sdr sender, req ...string) {
 	}
 
 	for _, s := range strings.Split(string(out), "\n") {
-		if s != "" {
-			dataTransfer <- fmt.Sprintf("%s\r\n", s)
+		if s == "" || strings.HasPrefix(s, "total") {
+			continue
 		}
+		dataTransfer <- fmt.Sprintf("%s\r\n", s)
 	}
 
-	transferred <- "done"
+	close(dataTransfer)
+
+	<-transferred
 
 	sdr.sendReplyCodeWithMessage(ReplyCodeCloseDataConnection, "Transfer complete")
 }
