@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"os/exec"
+	"strings"
 )
 
 const (
@@ -144,16 +146,25 @@ func list(sdr sender, req ...string) {
 	sdr.sendReplyCodeWithMessage(ReplyCodeFileStatusOkay, "Opening ASCII mode data connection for file list")
 
 	// sample list output
-	strs := []string{
-		"lrwxrwxrwx   1 root     root           16 Oct 21  2015 debian -> pub/Linux/debian",
-		"lrwxrwxrwx   1 root     root           26 Oct 21  2015 debian-backports -> pub/Linux/debian-backports",
-		"lrwxrwxrwx   1 root     root           19 Oct 21  2015 debian-cd -> pub/Linux/debian-cd",
-		"lrwxrwxrwx   1 root     root           25 Oct 21  2015 debian-volatile -> pub/Linux/debian-volatile",
-		"lrwxrwxrwx   1 root     root           16 Oct 21  2015 gentoo -> pub/Linux/gentoo",
-		"drwxr-xr-x  25 ftp-mirror ftp-adm      4096 Oct 18 07:49 pub",
+	// strs := []string{
+	// 	"lrwxrwxrwx   1 root     root           16 Oct 21  2015 debian -> pub/Linux/debian",
+	// 	"lrwxrwxrwx   1 root     root           26 Oct 21  2015 debian-backports -> pub/Linux/debian-backports",
+	// 	"lrwxrwxrwx   1 root     root           19 Oct 21  2015 debian-cd -> pub/Linux/debian-cd",
+	// 	"lrwxrwxrwx   1 root     root           25 Oct 21  2015 debian-volatile -> pub/Linux/debian-volatile",
+	// 	"lrwxrwxrwx   1 root     root           16 Oct 21  2015 gentoo -> pub/Linux/gentoo",
+	// 	"drwxr-xr-x  25 ftp-mirror ftp-adm      4096 Oct 18 07:49 pub",
+	// }
+
+	out, err := exec.Command("ls", "-l").Output()
+	if err != nil {
+		log.Fatal(err)
 	}
 
-	for _, s := range strs {
+	//og.Printf("%q", out)
+
+	// s := strings.Replace(out, "\n", "\r\n", -1)
+
+	for _, s := range strings.Split(string(out), "\n") {
 		dataTransfer <- fmt.Sprintf("%s\r\n", s)
 	}
 
