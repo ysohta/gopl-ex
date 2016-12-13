@@ -28,12 +28,15 @@ const (
 	LIST CommandType = "LIST"
 	PORT CommandType = "PORT"
 	RETR CommandType = "RETR"
+	STOR CommandType = "STOR"
 	MDTM CommandType = "MDTM"
 )
 
 var (
 	Commands     map[CommandType]Command
 	dataTransfer chan string = make(chan string)
+	dataImport   chan []byte = make(chan []byte)
+	importing    chan string = make(chan string)
 	transferred  chan string = make(chan string)
 )
 
@@ -50,6 +53,7 @@ func init() {
 		LIST: list,
 		PORT: port,
 		RETR: retr,
+		STOR: stor,
 		MDTM: mdtm,
 	}
 }
@@ -201,13 +205,6 @@ func retr(sdr sender, req ...string) {
 		dataTransfer <- string(p[:n])
 	}
 
-	// for _, s := range strings.Split(string(out), "\n") {
-	// 	if s == "" || strings.HasPrefix(s, "total") {
-	// 		continue
-	// 	}
-	// 	dataTransfer <- fmt.Sprintf("%s\r\n", s)
-	// }
-
 	close(dataTransfer)
 
 	<-transferred
@@ -228,4 +225,53 @@ func mdtm(sdr sender, req ...string) {
 
 	t := fi.ModTime().Format("20060102150405")
 	sdr.sendReplyCodeWithMessage(ReplyCodeFileStatus, t)
+}
+
+func stor(sdr sender, req ...string) {
+	if len(req) < 1 {
+		sdr.sendReplyCode(ReplyCodeParameterError)
+		return
+	}
+
+	log.Printf("req=%v", req)
+
+	pathname := req[0]
+	// fi, err := os.Stat(pathname)
+	// if err != nil {
+	// 	sdr.sendReplyCodeWithMessage(ReplyCodeFileUnavailable, "unable to open")
+	// 	return
+	// }
+	msg := fmt.Sprintf("Opening BINARY mode data connection")
+	sdr.sendReplyCodeWithMessage(ReplyCodeFileStatusOkay, msg)
+
+	importing <- "start"
+	f, err := os.Create(pathname)
+	if err != nil {
+		sdr.sendReplyCodeWithMessage(ReplyCodeFileUnavailable, "unable to open")
+		return
+	}
+	defer f.Close()
+
+	w := bufio.NewWriter(f)
+
+loop:
+	for {
+		select {
+		case data := <-dataImport:
+			log.Print("data:", data)
+			// copy(p, data)
+			n, err := w.Write(data)
+			if err != nil {
+				log.Print("error:", err)
+				break loop
+			}
+			w.Flush()
+			log.Print("write bytes:", n)
+		case <-transferred:
+			log.Print("transfer complete")
+			break loop
+		}
+	}
+
+	sdr.sendReplyCodeWithMessage(ReplyCodeCloseDataConnection, "Transfer complete")
 }

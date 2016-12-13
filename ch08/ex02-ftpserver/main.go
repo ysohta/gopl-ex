@@ -122,12 +122,32 @@ func handleDataTransferConn(c net.Conn) {
 	dataTransfer = make(chan string)
 
 	for {
-		data, ok := <-dataTransfer
-		if !ok {
-			break
-		}
-		sdr.sendData(data)
-	}
+		select {
+		case data, ok := <-dataTransfer:
+			if !ok {
+				break
+			}
+			sdr.sendData(data)
+		case <-importing:
 
-	transferred <- "done"
+			p := make([]byte, 1024)
+			r := bufio.NewReader(sdr.c)
+			n, err := r.Read(p)
+			if err != nil {
+				if err != io.EOF {
+					// unknown error occurs
+					log.Printf("read error: %s", err)
+				}
+
+				transferred <- "done"
+				return
+			}
+
+			dataImport <- p[:n]
+
+			log.Print("transferred")
+			transferred <- "done"
+			return
+		}
+	}
 }
