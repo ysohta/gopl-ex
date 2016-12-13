@@ -4,7 +4,6 @@ import (
 	"flag"
 	"fmt"
 	"log"
-	"strings"
 )
 
 var (
@@ -44,9 +43,7 @@ func main() {
 	go func() {
 		links := make([]link, len(flag.Args()))
 		for _, arg := range flag.Args() {
-			if !strings.HasPrefix(arg, "-") {
-				links = append(links, link{arg, 1})
-			}
+			links = append(links, link{arg, 1})
 		}
 		worklist <- links
 	}()
