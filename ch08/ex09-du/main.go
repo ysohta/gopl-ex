@@ -27,15 +27,12 @@ func main() {
 		roots = []string{"."}
 	}
 
-	// num := 10
 	ch := make([]chan int64, len(roots))
 	for i, _ := range ch {
 		ch[i] = make(chan int64)
 	}
 
 	// Traverse each root of the file tree in parallel.
-	//	fileSizes := make(chan int64)
-
 	for i, root := range roots {
 		var n sync.WaitGroup
 		n.Add(1)
@@ -52,44 +49,57 @@ func main() {
 	}
 
 	files := map[string]fileInfo{}
+	var wg sync.WaitGroup
 
-	for i, _ := range ch {
-		var nfiles, nbytes int64
-	loop:
-		for {
-			select {
-			case size, ok := <-ch[i]:
-				if !ok {
-					break loop // fileSizes was closed
+	for i, c := range ch {
+		wg.Add(1)
+		go func(root string, c chan int64) {
+			var nfiles, nbytes int64
+		loop:
+			for {
+				select {
+				case size, ok := <-c:
+					if !ok {
+						wg.Done()
+						break loop // fileSizes was closed
+					}
+					nfiles++
+					nbytes += size
+
+					f := files[root]
+					f.nfiles = nfiles
+					f.nbytes = nbytes
+					files[root] = f
+
+				case <-tick:
+					// printDiskUsage(root, nfiles, nbytes)
+					printDiskUsageAll(files)
 				}
-				nfiles++
-				nbytes += size
-
-				f := files[roots[i]]
-				f.nfiles = nfiles
-				f.nbytes = nbytes
-				files[roots[i]] = f
-
-			case <-tick:
-				printDiskUsage(roots[i], nfiles, nbytes)
 			}
-		}
+
+		}(roots[i], c)
 
 	}
 
+	wg.Wait()
+	fmt.Println("-----")
+
+	printDiskUsageAll(files)
+}
+
+func printDiskUsageAll(files map[string]fileInfo) {
 	for root, f := range files {
 		printDiskUsage(root, f.nfiles, f.nbytes)
 	}
-
+	fmt.Println()
 }
 
 func printDiskUsage(root string, nfiles, nbytes int64) {
-	fmt.Printf("%s %d files  %.1f GB\n", root, nfiles, float64(nbytes)/1e9)
+	fmt.Printf("%d files\t%.1f GB\t%s\n", nfiles, float64(nbytes)/1e9, root)
 }
 
 // walkDir recursively walks the file tree rooted at dir
 // and sends the size of each found file on fileSizes.
-//!+walkDir
 func walkDir(dir string, n *sync.WaitGroup, fileSizes chan<- int64) {
 	defer n.Done()
 	for _, entry := range dirents(dir) {
