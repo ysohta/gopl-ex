@@ -28,12 +28,10 @@ func main() {
 	}
 
 	ch := make([]chan int64, len(roots))
-	for i, _ := range ch {
-		ch[i] = make(chan int64)
-	}
 
 	// Traverse each root of the file tree in parallel.
 	for i, root := range roots {
+		ch[i] = make(chan int64)
 		var n sync.WaitGroup
 		n.Add(1)
 		go walkDir(root, &n, ch[i])
@@ -53,32 +51,29 @@ func main() {
 
 	for i, c := range ch {
 		wg.Add(1)
+
+		// a goroutine always updates specific value in files
 		go func(root string, c chan int64) {
-			var nfiles, nbytes int64
 		loop:
 			for {
 				select {
 				case size, ok := <-c:
 					if !ok {
 						wg.Done()
-						break loop // fileSizes was closed
+						break loop // channel was closed
 					}
-					nfiles++
-					nbytes += size
 
 					f := files[root]
-					f.nfiles = nfiles
-					f.nbytes = nbytes
+					f.nfiles++
+					f.nbytes += size
 					files[root] = f
 
 				case <-tick:
-					// printDiskUsage(root, nfiles, nbytes)
+					// one  of goroutines catch tick and print all
 					printDiskUsageAll(files)
 				}
 			}
-
 		}(roots[i], c)
-
 	}
 
 	wg.Wait()
