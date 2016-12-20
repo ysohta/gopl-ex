@@ -1,5 +1,7 @@
 package memo
 
+import "fmt"
+
 // Func is the type of the function to memoize.
 type Func func(key string) (interface{}, error)
 
@@ -18,7 +20,21 @@ type request struct {
 	response chan<- result // the client wants a single result
 }
 
-type Memo struct{ requests chan request }
+type Memo struct {
+	requests chan request
+	Cancel   chan struct{}
+}
+
+var done = make(chan struct{})
+
+func cancelled() bool {
+	select {
+	case <-done:
+		return true
+	default:
+		return false
+	}
+}
 
 // New returns a memoization of f.  Clients must subsequently call Close.
 func New(f Func) *Memo {
@@ -30,8 +46,13 @@ func New(f Func) *Memo {
 func (memo *Memo) Get(key string) (interface{}, error) {
 	response := make(chan result)
 	memo.requests <- request{key, response}
-	res := <-response
-	return res.value, res.err
+	select {
+	case res := <-response:
+		return res.value, res.err
+	case <-memo.Cancel:
+		return nil, fmt.Errorf("canceled")
+	}
+
 }
 
 func (memo *Memo) Close() { close(memo.requests) }
