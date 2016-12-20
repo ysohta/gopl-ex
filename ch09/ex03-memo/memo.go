@@ -27,15 +27,6 @@ type Memo struct {
 
 var done = make(chan struct{})
 
-func cancelled() bool {
-	select {
-	case <-done:
-		return true
-	default:
-		return false
-	}
-}
-
 // New returns a memoization of f.  Clients must subsequently call Close.
 func New(f Func) *Memo {
 	memo := &Memo{requests: make(chan request)}
