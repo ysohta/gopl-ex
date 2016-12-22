@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"runtime"
 	"strings"
 )
 
@@ -44,6 +45,7 @@ func init() {
 	Commands = map[CommandType]Command{
 		USER: user,
 		PASS: pass,
+		SYST: syst,
 		FEAT: feat,
 		QUIT: quit,
 		PWD:  pwd,
@@ -85,6 +87,14 @@ func user(sdr sender, req ...string) {
 
 func pass(sdr sender, req ...string) {
 	sdr.sendReplyCodeWithMessage(ReplyCodeUserLoggedIn, "Welcome to FTP server.")
+}
+
+func syst(sdr sender, req ...string) {
+	strOS := runtime.GOOS
+	if strOS == "darwin" {
+		strOS = "Mac"
+	}
+	sdr.sendReplyCodeWithMessage(ReplyCodeNameSystem, strOS)
 }
 
 func feat(sdr sender, req ...string) {
