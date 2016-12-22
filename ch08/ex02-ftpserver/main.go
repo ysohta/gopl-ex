@@ -125,7 +125,8 @@ func handleDataTransferConn(c net.Conn) {
 		select {
 		case data, ok := <-dataTransfer:
 			if !ok {
-				break
+				transferred <- "done"
+				return
 			}
 			sdr.sendData(data)
 		case <-importing:
