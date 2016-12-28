@@ -7,7 +7,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/ysohta/gopl-ex/ch10/ex02-extractor"
+	"github.com/ysohta/gopl-ex/ch10/ex02-extractor/extractor"
 )
 
 func init() {
