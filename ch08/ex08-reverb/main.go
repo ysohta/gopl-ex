@@ -53,7 +53,6 @@ func main() {
 	}
 	defer l.Close()
 
-	//go func() {
 	for {
 		conn, err := l.Accept()
 		if err != nil {
@@ -63,6 +62,4 @@ func main() {
 
 		go handleConn(conn)
 	}
-	//}()
-
 }
