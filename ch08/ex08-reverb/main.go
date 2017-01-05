@@ -9,10 +9,6 @@ import (
 	"time"
 )
 
-var (
-	reset = make(chan struct{})
-)
-
 func echo(c net.Conn, shout string, delay time.Duration) {
 	fmt.Fprintln(c, "\t", strings.ToUpper(shout))
 	time.Sleep(delay)
@@ -22,6 +18,23 @@ func echo(c net.Conn, shout string, delay time.Duration) {
 }
 
 func handleConn(c net.Conn) {
+	reset := make(chan struct{})
+
+	go func() {
+		tick := time.Tick(1 * time.Second)
+		countdown := 10
+		for countdown > 0 {
+			fmt.Println(countdown)
+			select {
+			case <-tick:
+				countdown--
+			case <-reset:
+				countdown = 10
+			}
+		}
+		c.Close()
+	}()
+
 	input := bufio.NewScanner(c)
 	for input.Scan() {
 		echo(c, input.Text(), 1*time.Second)
@@ -29,6 +42,7 @@ func handleConn(c net.Conn) {
 		// reset countdown
 		reset <- struct{}{}
 	}
+
 	c.Close()
 }
 
@@ -39,27 +53,16 @@ func main() {
 	}
 	defer l.Close()
 
-	go func() {
-		for {
-			conn, err := l.Accept()
-			if err != nil {
-				log.Print(err) // e.g., connection aborted
-				continue
-			}
-
-			go handleConn(conn)
+	//go func() {
+	for {
+		conn, err := l.Accept()
+		if err != nil {
+			log.Print(err) // e.g., connection aborted
+			continue
 		}
-	}()
 
-	tick := time.Tick(1 * time.Second)
-	countdown := 10
-	for countdown > 0 {
-		fmt.Println(countdown)
-		select {
-		case <-tick:
-			countdown--
-		case <-reset:
-			countdown = 10
-		}
+		go handleConn(conn)
 	}
+	//}()
+
 }
