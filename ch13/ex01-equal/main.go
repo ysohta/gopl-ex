@@ -48,7 +48,7 @@ func equal(x, y reflect.Value, seen map[comparison]bool) bool {
 
 	case reflect.Float32, reflect.Float64:
 		diff := math.Abs(x.Float() - y.Float())
-		return diff < 1.0e-9
+		return diff < minDiff
 
 	case reflect.Complex64, reflect.Complex128:
 		return x.Complex() == y.Complex()
