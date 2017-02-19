@@ -42,7 +42,6 @@ func (w *writer) Write(data []byte) (int, error) {
 
 	if w.stream == nil {
 		return 0, fmt.Errorf("closed")
-		// panic("closed")
 	}
 	var total int // uncompressed bytes written
 
@@ -65,8 +64,6 @@ func (w *writer) Close() error {
 	defer w.mu.Unlock()
 
 	if w.stream == nil {
-		// panic("closed")
-
 		return fmt.Errorf("closed")
 	}
 	defer func() {
