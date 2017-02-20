@@ -7,6 +7,6 @@ before_install:
   - go get github.com/mattn/goveralls
 script:
  - go test -v ./...
- - echo 'mode: command' > overalls.coverprofile
+ - echo "mode':' command" > overalls.coverprofile
  - for dir in */; do overalls -project=github.com/ysohta/gopl-ex/$dir; grep github $dir/overalls.coverprofile >> overalls.coverprofile ; done
  - goveralls -coverprofile=overalls.coverprofile -repotoken $TOKEN_COVERALLS
