@@ -9,4 +9,4 @@ script:
  - go test -v ./...
  - echo mode: command > overalls.coverprofile
  - for dir in */; do overalls -project=github.com/ysohta/gopl-ex/$dir; grep github $dir/overalls.coverprofile >> overalls.coverprofile ; done
- - goveralls -coverprofile=overalls.coverprofile -service=drone.io
+ - goveralls -coverprofile=overalls.coverprofile -repotoken $TOKEN_COVERALLS
