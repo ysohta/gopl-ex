@@ -110,7 +110,18 @@ func readList(lex *lexer, v reflect.Value) {
 			}
 			name := lex.text()
 			lex.next()
-			read(lex, v.FieldByName(name))
+
+			f := v.FieldByName(name)
+			for i := 0; i < v.Type().NumField(); i++ {
+				sf := v.Type().Field(i)
+				tag := sf.Tag.Get("sexpr")
+				if tag == name {
+					f = v.Field(i)
+					continue
+				}
+			}
+
+			read(lex, f)
 			lex.consume(')')
 		}
 
